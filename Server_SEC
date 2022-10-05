@@ -1,0 +1,32 @@
+AUTOMATIC UPDATES
+Download package: "apt install unattended-upgrades"
+Set it up: "dpkg-reconfigure --priority=low unattended-upgrades"
+CREATING ANOTHER USER WITH SUDO PRIVS
+Create user: "adduser mrblue"
+Add user to sudo group: "usermod -aG sudo bob"
+CREATE KEY-PAIR/ID_RSA
+create directory to store public key: "mkdir ~/.ssh && chmod 700 ~/.ssh"
+Generate key pair on local system: "ssh-keygen -b 4096"
+Gotto dir with public and private key: "cd .ssh"
+Send public key to server: 
+WINDOWS -> "scp $env:USERPROFILE/.ssh/id_rsa.pub bob@172.105.19.68:~/.ssh/authorized_keys"
+LINUX -> "ssh-copy-id bob@172.105.19.68"
+MACOS -> "scp ~/.ssh/id_rsa.pub bob@172.105.19.68:~/.ssh/authorized_keys"
+LOCKDOWN login (SSH)
+Modify config file: "sudo nano /etc/ssh/sshd_config"
+- change port: Uncomment and change deffault port 22 - > 789
+- change address family: Uncomment and change "any" - > inet
+- PermitRootLogin: yes - > no
+- PaswordAuthentication: yes - > no
+- Restart ssh service: "sudo systemctl restart sshd"
+FIREWALL
+Show open ports: "sudo ss -tupln"
+Install Uncomplicated-Firewall(UFW): "sudo apt install ufw"
+Allow port: "sudo ufw allow port"
+Enable firewall: "sudo ufw enable"
+Trytologin
+NOTE: If you download other service make sure to update ufw rules
+BLOCK PING
+Edit file: "sudo nano /etc/ufw/before.rules"
+Add line to "ok cimp codes for input": "-A ufw-before-input -p icmp --icmp-type echo-request -j DROP" 
+Reload firewall: "sudo ufw reload" or reboot "sudo reboot"
