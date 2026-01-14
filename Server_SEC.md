@@ -1,3 +1,5 @@
+## outdated (workinprogress)
+
 AUTOMATIC UPDATES
 Download package: "apt install unattended-upgrades"
 Set it up: "dpkg-reconfigure --priority=low unattended-upgrades"
