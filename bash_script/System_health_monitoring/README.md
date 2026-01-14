@@ -1,56 +1,101 @@
-#SYSTEM MONITORING SUITE
+# 🛡️ Secure Linux Monitoring Suite
+**Author:** mrblue
+**Version:** 1.0
 
-**Author**: mrblue **Version**: 1.0 
+# 📋 1. Prerequisites & Dependencies
+Before installation, ensure your system has the necessary tools to send emails and read hardware sensors.
 
-# OVERVIEW
+# Identify your OS and Install: 
 
-This suite consists of four specialized monitoring scripts designed for high-availability Linux environments. Each script is modular, logs to /var/log/, and includes a self-service cron installation feature.
+## Debian, Ubuntu, or Kali Linux:
+    
+    sudo apt update && sudo apt install git mailutils lm-sensors -y
 
-# 1. SCRIPT DEFINITIONS
-## Disk Space Alert (disk_monitor.sh)
+## For RHEL, CentOS, or Fedora:
+    
+    sudo dnf install git s-nail lm_sensors -y
 
-Monitors mount points and alerts via email if usage exceeds 90%. It ignores virtual and read-only filesystems like tmpfs and squashfs to reduce noise.
+## Hardware Sensor Setup:
+You must initialize the sensors for the thermal monitor to function:
+    
+    sudo sensors-detect
 
-## Service Watchdog (service_watchdog.sh)
+Note: Press ENTER for all default prompts.
 
-Checks if critical services (Nginx, MySQL, Docker) are active. If a service is down, it attempts a restart, waits for stabilization, and verifies the recovery status.
+# 🚀 2. Installation
+The suite features a Master Installer that clones the repository and configures your environment automatically.
 
-## Zombie Process Hunter (zombie_hunter.sh)
+## The One-Liner Install:
+Run this command to pull the latest version directly from GitHub:
+    
+    curl -sSL https://raw.githubusercontent.com/mrblue223/Secure_linux/main/install.sh | sudo bash
 
-Identifies "defunct" processes. Because zombies are already dead and cannot be killed, this script captures the Parent PID (PPID) so the administrator can restart the parent process to clean the process table.
+## What the Installer Does:
+- Prompts for Configuration: Asks for your alert email and preferred system user.
+- Creates /etc/monitor.conf: Generates a central settings file.
+- Deploys Binaries: Moves scripts to /usr/local/bin for system-wide access.
+- Initializes Logs: Creates log files in /var/log with secure permissions (640).
+- Sets up Rotation: Configures logrotate to prevent disk bloat.
 
-## Hardware Thermal Monitor (thermal_monitor.sh)
+# ⚙️ 3. Configuration
+All scripts source their settings from a single file located at monitor.conf
 
-Uses lm-sensors to track CPU package temperatures. It alerts the administrator if the system approaches thermal throttling limits (default 85°C).
+## Editing Settings:
+Open the config file to change alert thresholds or the list of monitored services:
 
-## Log ration
+    sudo nano monitor.conf
 
-This script is designed to be the "single source of truth." It automates the directory structure, log initialization, script placement, and log rotation in one idempotent execution.
+## Key Parameters:
+- **ALERT_EMAIL:** The address where all alerts are sent.
+- **DISK_THRESHOLD:** Percentage (default 90) before a disk alert triggers.
+- **TEMP_LIMIT:** Celsius (default 85) before a thermal alert triggers.
+- **WATCHDOG_SERVICES:** A list of services (e.g., nginx, docker) to monitor for uptime.
 
-# 2. INSTALLATION REQUIREMENTS
-**System Dependencies**
+# ⏰ 4. Automation (Cron Setup)
+After installation, you must decide how often each script runs. Each monitoring script contains a --setup flag to handle this.
 
-You must install the following utilities for mail delivery and sensor reading:
+## Example: Automating the Disk Monitor
+sudo disk_monitor.sh --setup
 
-**Debian/Ubuntu:** sudo apt update && sudo apt install mailutils lm-sensors -y
+## recommendations
+- Script,Recommended Frequency,Purpose
+- service_watchdog.sh,Every 5 minutes,Ensures critical services are always up.
+- thermal_monitor.sh,Every 10 minutes,Protects hardware from overheating.
+- disk_monitor.sh,Hourly,Monitors storage growth.
+- zombie_hunter.sh,Hourly,Cleans up the process table.
 
-**RHEL/CentOS:** sudo dnf install mailx lm_sensors -y
-Sensor Initialization
+# 📂 5. Logging & Maintenance
 
-Before running the thermal monitor, detect your hardware sensors: sudo sensors-detect (Press ENTER for all defaults)
+## Viewing Logs:
+Each script logs events to /var/log/. To see live monitoring events:
 
-# 3. DEPLOYMENT STEPS
-## Step 1: Permissions
+    tail -f /var/log/*.log
 
-Set the execution bit on all downloaded scripts: chmod +x disk_monitor.sh service_watchdog.sh zombie_hunter.sh thermal_monitor.sh logrotate.sh
-## Step 2: Logging Setup
+## Log Rotation:
+The suite includes a logrotate configuration to ensure logs are compressed weekly and kept for 4 weeks. This happens automatically in the background.
 
-Create the required log files in the /var/log directory: sudo touch /var/log/disk_monitor.log /var/log/service_watchdog.log /var/log/zombie_hunter.log /var/log/thermal_monitor.log sudo chown $USER /var/log/*.log
-## Step 3: Automated Scheduling
+## 🛠️ 6. Troubleshooting
+- No Emails? Ensure your local mail agent is configured correctly. Try sending a test: echo "Test" | mail -s "Test Alert" your@email.com
+- Permission Denied? Ensure you are running scripts with sudo or as the root user.
+- Sensors missing? Re-run sudo sensors-detect and restart the kmod service or reboot.
 
-Run each script with the --setup flag to interactively add it to your crontab: ./disk_monitor.sh --setup ./service_watchdog.sh --setup ./zombie_hunter.sh --setup ./thermal_monitor.sh --setup
-# 4. LOGGING & AUDIT
 
-Every action is recorded in its respective log file. You can monitor system health in real-time using: tail -f /var/log/*.log
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
