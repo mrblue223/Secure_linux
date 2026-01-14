@@ -23,6 +23,10 @@ Identifies "defunct" processes. Because zombies are already dead and cannot be k
 
 Uses lm-sensors to track CPU package temperatures. It alerts the administrator if the system approaches thermal throttling limits (default 85°C).
 
+## Log ration
+
+This script is designed to be the "single source of truth." It automates the directory structure, log initialization, script placement, and log rotation in one idempotent execution.
+
 # 2. INSTALLATION REQUIREMENTS
 **System Dependencies**
 
@@ -38,7 +42,7 @@ Before running the thermal monitor, detect your hardware sensors: sudo sensors-d
 # 3. DEPLOYMENT STEPS
 ## Step 1: Permissions
 
-Set the execution bit on all downloaded scripts: chmod +x disk_monitor.sh service_watchdog.sh zombie_hunter.sh thermal_monitor.sh
+Set the execution bit on all downloaded scripts: chmod +x disk_monitor.sh service_watchdog.sh zombie_hunter.sh thermal_monitor.sh logrotate.sh
 ## Step 2: Logging Setup
 
 Create the required log files in the /var/log directory: sudo touch /var/log/disk_monitor.log /var/log/service_watchdog.log /var/log/zombie_hunter.log /var/log/thermal_monitor.log sudo chown $USER /var/log/*.log
@@ -50,7 +54,3 @@ Run each script with the --setup flag to interactively add it to your crontab: .
 Every action is recorded in its respective log file. You can monitor system health in real-time using: tail -f /var/log/*.log
 
 
-
-
-
-Every action is recorded in its respective log file. You can monitor system health in real-time using: tail -f /var/log/*.log
